@@ -15,9 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.conf.urls import include, url
+from rest_framework_swagger.views import get_swagger_view
+from rest_framework_swagger import renderers
 
+class JSONOpenAPIRenderer(renderers.OpenAPIRenderer):
+    media_type = 'application/json'
+
+schema_view = get_swagger_view(title='Main API')
 
 urlpatterns = [
+    url(r'^$', schema_view),
     url(r'^api/v1/', include('core.urls'), name='core'),
     url(r'^admin/', admin.site.urls)
 ]
