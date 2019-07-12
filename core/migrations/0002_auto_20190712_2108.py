@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tutorinformation',
             name='phone_number',
-            field=models.CharField(default='12049956727', max_length=10),
+            field=models.CharField(default='12049956727', max_length=11),
             preserve_default=False,
         ),
         migrations.AddField(
