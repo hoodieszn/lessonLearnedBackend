@@ -1,6 +1,7 @@
 from . import storage
 from . import serializers
 from . import helpers
+from . import models
 from rest_framework import status
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 from rest_framework_swagger import renderers
@@ -166,6 +167,65 @@ def add_tutor_review(request, tutor_id, parsed_body=None):
 
     except Exception as ex:
         return helpers.api_error("Error occured while creating a TutorReview. Exception: {}".
+            format(str(ex)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET', 'POST'])
+@renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+def users_handler(request):
+    if request.method == 'GET':
+        return get_user(request)
+    elif request.method == 'POST':
+        return create_user(request)
+
+def get_user(request):
+    firebase_id = request.GET.get('firebase_id')
+
+    if not firebase_id:
+        return helpers.api_error('pass the firebase_id as a query param', status.HTTP_400_BAD_REQUEST)
+    
+    user = storage.get_user_from_firebase(firebase_id)
+
+    if not user:
+        return helpers.api_error('Could not find a user with firebase_id: {}'.format(firebase_id), status.HTTP_400_BAD_REQUEST)
+
+    result = {'user': serializers.user_to_dict(user)}
+
+    if user.user_type == models.UserType.Tutor.value:
+        tutor_info = storage.get_tutor_information_for_user(user)
+        
+        avg_rating, tutor_reviews = storage.get_tutor_ratings_reviews(tutor_info)
+
+        result['user'].update({'tutor_info': serializers.tutor_to_dict(tutor_info)})
+        result['user']['tutor_info'].update({'avg_rating': avg_rating})
+        result['user']['tutor_info'].update({'reviews': [serializers.review_to_dict(review) for review in tutor_reviews]})
+
+    return helpers.api_success(result)
+
+
+@helpers.parse_api_json_body
+def create_user(request, parsed_body=None):
+    school_id = parsed_body.get('school_id', None)
+    user_type = parsed_body.get('user_type', 'student') # Defaults to student
+    firebase_id = parsed_body.get('firebase_id', None)
+
+    if not (school_id and firebase_id):
+        return helpers.api_error('Invalid fields: school_id: {}, firebase_id: {}'.format(
+            school_id, firebase_id), status.HTTP_400_BAD_REQUEST)
+
+    school = storage.get_school_by_id(school_id)
+
+    if not school:
+        return helpers.api_error('School with id: {} not found'.format(school_id), status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user_type = models.UserType(user_type)
+        user_info = storage.create_user_info(school, user_type, firebase_id)
+
+        return helpers.api_success({'user': serializers.user_to_dict(user_info)})
+
+    except Exception as ex:
+        return helpers.api_error("Error occured while creating a User. Exception: {}".
             format(str(ex)), status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

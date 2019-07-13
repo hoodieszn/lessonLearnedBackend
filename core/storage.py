@@ -93,3 +93,12 @@ def create_review_for_tutor(tutor, comment, rating, user):
         rating=rating,
         user=user
     )
+
+def get_school_by_id(school_id):
+    return safe_get(models.School, id=school_id)
+
+def create_user_info(school, user_type, firebase_id):
+    return models.UserInformation.objects.create(
+        user_type=user_type,
+        school=school,
+        firebase_id=firebase_id)
