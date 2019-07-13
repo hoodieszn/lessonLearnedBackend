@@ -1,3 +1,5 @@
+import functools
+import json
 from rest_framework import status
 from django.http import JsonResponse
 
@@ -22,3 +24,14 @@ def api_success(data, status_code=status.HTTP_200_OK):
 
 def api_error(message, status_code=status.HTTP_200_OK):
     return JsonResponse({'error': message}, status=status_code)
+
+
+def parse_api_json_body(func):
+    @functools.wraps(func)
+    def wrap(request, *args, **kwargs):
+        parsed_request_body = None
+        decoded = request.body.decode('utf-8')
+        if decoded is not None and not (decoded == ""):
+            parsed_request_body = json.loads(decoded)
+        return func(request, *args, **kwargs, parsed_body=parsed_request_body)
+    return wrap

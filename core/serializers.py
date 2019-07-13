@@ -27,3 +27,14 @@ def tutor_review_to_dict(tutor_review):
             'tutor_id': tutor_review.tutor.id}
 
 
+def school_to_dict(school):
+    return {'id': school.id,
+            'name': school.name}
+
+def review_to_dict(review):
+    return {'id': review.id,
+            'comment': review.comment,
+            'rating': review.rating,
+            'tutor_id': review.tutor.id,
+            'tutor_user_id': review.tutor.user.id,
+            'user_id': review.user.id}
