@@ -41,7 +41,6 @@ def get_tutors(request, degree):
             del result[i]
             continue
 
-        print(tutor.id)
         avg_rating, tutor_reviews = storage.get_tutor_ratings_reviews(tutor)
 
         result[i].update({
@@ -95,7 +94,8 @@ def create_tutor_for_degree(request, degree_id, parsed_body=None):
             format(str(ex)), status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@require_GET
+@api_view(['GET'])
+@renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
 def get_courses(request, degree_id):
 
     degree = storage.get_degree_by_id(degree_id)
@@ -106,7 +106,8 @@ def get_courses(request, degree_id):
     courses_for_degree = storage.get_courses_by_degree(degree)
     return helpers.api_success({'courses': [serializers.course_to_dict(course) for course in courses_for_degree]})
 
-@require_GET
+@api_view(['GET'])
+@renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
 def get_schools(request):
 
     schools = storage.get_schools()
