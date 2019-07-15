@@ -37,7 +37,11 @@ def review_to_dict(review):
             'user_id': review.user.id}
 
 def user_to_dict(user):
+    user_type = user.user_type
+    if type(user.user_type) is not str:
+        user_type = user_type.value
+
     return {'id': user.id,
-            'user_type': user.user_type.value,
+            'user_type': user_type,
             'school_id': user.school.id,
             'firebase_id': user.firebase_id}
