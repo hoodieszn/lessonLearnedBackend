@@ -32,10 +32,10 @@ class TutoredCourseAdmin(admin.ModelAdmin):
     list_display = ['pk', 'course', 'tutor']
 
 class TutorInformationAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'phone_number', 'degree_name', 'lat', 'lon']
+    list_display = ['pk', 'phone_number', 'lat', 'lon']
 
-    def degree_name(self, obj):
-        return obj.degree.name
+    # def degree_name(self, obj):
+    #     return obj.degree.name
 
 class TutorReviewAdmin(admin.ModelAdmin):
     list_display = ['pk', 'comment', 'rating', 'user']
