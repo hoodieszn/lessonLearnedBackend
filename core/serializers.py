@@ -4,7 +4,8 @@ from . import storage
 def degree_to_dict(degree):
     return {'id': degree.id, 
             'name': degree.name,
-            'school': degree.school.id}
+            'schoolId': degree.school.id,
+            'schoolName': degree.school.name}
 
 def tutor_posting_to_dict(tutor_posting):
     return {'id': tutor_posting.id,
