@@ -27,7 +27,8 @@ def course_to_dict(course):
             'name': course.name}
 
 def tutor_review_to_dict(tutor_review):
-    return {'reviewText': tutor_review.review_text,
+    return {'tutorName': tutor_review.tutor.name,
+            'reviewText': tutor_review.review_text,
             'rating': tutor_review.rating,
             'userId': tutor_review.user.id, 
             'tutorId': tutor_review.tutor.id,
