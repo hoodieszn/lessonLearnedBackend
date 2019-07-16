@@ -212,13 +212,17 @@ def get_user(request):
 
 @helpers.parse_api_json_body
 def create_user(request, parsed_body=None):
-    school_id = parsed_body.get('school_id', None)
-    user_type = parsed_body.get('user_type', 'student') # Defaults to student
-    firebase_id = parsed_body.get('firebase_id', None)
+    school_id = parsed_body.get('schoolId', None)
+    name = parsed_body.get('name', None)
+    user_type = parsed_body.get('userType', 'student') # Defaults to student
+    firebase_id = parsed_body.get('firebaseId', None)
+    phone_number = parsed_body.get('phoneNumber', None)
+    lat = parsed_body.get('lat', None)
+    lon = parsed_body.get('lon', None)
 
-    if not (school_id and firebase_id):
-        return helpers.api_error('Invalid fields: school_id: {}, firebase_id: {}'.format(
-            school_id, firebase_id), status.HTTP_400_BAD_REQUEST)
+    if not (school_id and firebase_id and name and phone_number):
+        return helpers.api_error('Invalid fields: schoolId: {}, name: {}, firebaseId: {} phoneNumber: {}'.format(
+            school_id, name, firebase_id, phone_number), status.HTTP_400_BAD_REQUEST)
 
     school = storage.get_school_by_id(school_id)
 
@@ -226,8 +230,8 @@ def create_user(request, parsed_body=None):
         return helpers.api_error('School with id: {} not found'.format(school_id), status.HTTP_400_BAD_REQUEST)
 
     try:
-        user_type = models.UserType(user_type)
-        user_info = storage.create_user_info(school, user_type, firebase_id)
+        user_type = models.UserType(user_type).value
+        user_info = storage.create_user_info(school, name, phone_number, user_type, firebase_id, lat, lon)
 
         return helpers.api_success({'user': serializers.user_to_dict(user_info)})
 

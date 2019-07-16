@@ -104,8 +104,12 @@ def create_review_for_tutor(tutor, review_text, rating, user):
 def get_school_by_id(school_id):
     return safe_get(models.School, id=school_id)
 
-def create_user_info(school, user_type, firebase_id):
+def create_user_info(school, name, phone_number, user_type, firebase_id, lat, lon):
     return models.UserInformation.objects.create(
         user_type=user_type,
+        name=name,
+        phone_number=phone_number,
+        lat=lat,
+        lon=lon,
         school=school,
         firebase_id=firebase_id)
