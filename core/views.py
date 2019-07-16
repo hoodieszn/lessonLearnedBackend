@@ -86,17 +86,17 @@ def create_tutor_posting(request, degree_id, parsed_body=None):
     if existing: # Check if if we have already created a tutor profile for this user
         return helpers.api_error("User has an existing posting for degree: {}.".format(degree_id), status.HTTP_400_BAD_REQUEST)
 
-    # try:
-    posting, courses = storage.create_tutor_posting(user, degree, price, post_text, courses)
-    
-    result = serializers.tutor_posting_to_dict(posting)
-    result.update({'courses': [serializers.posting_course_to_dict(course) for course in courses]})
+    try:
+        posting, courses = storage.create_tutor_posting(user, degree, price, post_text, courses)
+        
+        result = serializers.tutor_posting_to_dict(posting)
+        result.update({'courses': [serializers.posting_course_to_dict(course) for course in courses]})
 
-    return helpers.api_success({'posting': result})
+        return helpers.api_success({'posting': result})
 
-    # except Exception as ex:
-    #     return helpers.api_error("Error occured creating TutorInformation and Courses. Exception: {}".
-    #         format(str(ex)), status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as ex:
+        return helpers.api_error("Error occured creating TutorInformation and Courses. Exception: {}".
+            format(str(ex)), status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
@@ -239,4 +239,58 @@ def create_user(request, parsed_body=None):
         return helpers.api_error("Error occured while creating a User. Exception: {}".
             format(str(ex)), status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+@api_view(['GET', 'POST'])
+@renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+def handle_tutor_contacts(request):
+    if request.method == 'GET':
+        return get_tutor_contacts(request)
+    elif request.method == 'POST':
+        return create_tutor_contact(request)
+
+
+def get_tutor_contacts(request):
+    user_id = request.GET.get('userId')
+
+    if not user_id:
+        return helpers.api_error('Include a userId as a query param', status.HTTP_400_BAD_REQUEST)
+
+    user = storage.get_user_by_id(user_id)
+
+    if not user:
+        return helpers.api_error('User with id: {} not found'.format(user_id), status.HTTP_400_BAD_REQUEST)
+
+    contacts = storage.get_contacted_tutors_for_user(user)
+
+    return helpers.api_success({'contacts': [serializers.tutor_contact_to_dict(contact) for contact in contacts]})
+
+
+@helpers.parse_api_json_body
+def create_tutor_contact(request, parsed_body=None):
+    tutor_id = parsed_body.get('tutorId', None)
+    user_id = parsed_body.get('userId', None)
+
+    if not (tutor_id and user_id):
+        return helpers.api_error('Invalid fields. userId: {} tutorId: {}'.format(user_id, tutor_id), status.HTTP_400_BAD_REQUEST)
+
+    
+    user = storage.get_user_by_id(user_id)
+    tutor = storage.get_user_by_id(tutor_id)
+
+    if not user:
+        return helpers.api_error('User with id: {} not found'.format(user_id), status.HTTP_400_BAD_REQUEST)
+
+    if not tutor:
+        return helpers.api_error('Tutor with id: {} not found'.format(tutor_id), status.HTTP_400_BAD_REQUEST)
+
+
+    existing_contact = storage.get_contacted_tutors_for_user(user).filter(tutor=tutor)
+
+    if existing_contact: 
+        return helpers.api_error('Already exists a TutorContact for User: {} and Tutor: {}.'.format(user_id, tutor_id), status.HTTP_400_BAD_REQUEST)
+
+
+    contact = storage.create_tutor_contact(user, tutor)
+
+    return helpers.api_success({'contact': serializers.tutor_contact_to_dict(contact)})
 

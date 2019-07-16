@@ -113,3 +113,9 @@ def create_user_info(school, name, phone_number, user_type, firebase_id, lat, lo
         lon=lon,
         school=school,
         firebase_id=firebase_id)
+
+def get_contacted_tutors_for_user(user):
+    return models.TutorContacts.objects.filter(user=user)
+
+def create_tutor_contact(user, tutor):
+    return models.TutorContacts.objects.create(user=user, tutor=tutor)
