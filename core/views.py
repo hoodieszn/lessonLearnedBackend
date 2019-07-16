@@ -46,8 +46,8 @@ def get_postings(request, degree):
 
         result[i].update({
             'courses': [serializers.course_to_dict(course.course) for course in tutored_courses],
-            # 'rating': avg_rating,
-            # 'reviews': [serializers.tutor_review_to_dict(review) for review in tutor_reviews],
+            'rating': avg_rating,
+            'reviews': [serializers.tutor_review_to_dict(review) for review in tutor_reviews],
         })
     
     return helpers.api_success({'tutorPostings': result})
