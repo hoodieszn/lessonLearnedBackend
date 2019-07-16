@@ -15,8 +15,12 @@ class School(models.Model):
 
 class UserInformation(models.Model):
     school = models.ForeignKey(School, on_delete=models.SET_NULL, null=True)
+    name = models.CharField(max_length=30, null=False, blank=False)
     user_type = models.CharField(max_length=10, choices=[(str(tag.value), tag.value) for tag in UserType])
+    phone_number = models.CharField(max_length=10, null=False, blank=False)
     firebase_id = models.CharField(max_length=128, default='', unique=True)
+    lat = models.FloatField(blank=True, null=True) # not yet sure what the best way to store location is
+    lon = models.FloatField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 class Degree(models.Model):
@@ -29,20 +33,26 @@ class Course(models.Model):
     degree = models.ForeignKey(Degree, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
-class TutorInformation(models.Model):
-    user = models.ForeignKey(UserInformation, on_delete=models.CASCADE)
-    phone_number = models.CharField(max_length=10, null=False, blank=False)
-    degree = models.ForeignKey(Degree, on_delete=models.SET_NULL, null=True)
-    hourly_rate = models.DecimalField(max_digits=6, decimal_places=2)
-    lat = models.FloatField(blank=True, null=True) # not yet sure what the best way to store location is
-    lon = models.FloatField(blank=True, null=True)
+class TutorPosting(models.Model):
+    tutor = models.ForeignKey(UserInformation, on_delete=models.CASCADE)
+    degree = models.ForeignKey(Degree, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    post_text = models.CharField(max_length=300, null=False, blank=False)
 
-class TutoredCourse(models.Model):
+class PostingCourse(models.Model):
+    tutor_posting = models.ForeignKey(TutorPosting, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete = models.CASCADE)
-    tutor = models.ForeignKey(TutorInformation, on_delete=models.CASCADE)
 
 class TutorReview(models.Model):
-    comment = models.CharField(max_length=400, blank=True)
+    review_text = models.CharField(max_length=400, blank=True)
     rating = models.IntegerField(default=1, validators=[MaxValueValidator(5), MinValueValidator(1)])
-    tutor = models.ForeignKey(TutorInformation, null=True, on_delete=models.SET_NULL)
-    user = models.ForeignKey(UserInformation, null=True, on_delete=models.SET_NULL)
+    tutor = models.ForeignKey(UserInformation, null=True, on_delete=models.SET_NULL, related_name='%(class)s_review_for')
+    user = models.ForeignKey(UserInformation, null=True, on_delete=models.SET_NULL, related_name='%(class)s_review_created')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class TutorContacts(models.Model):
+    tutor = models.ForeignKey(UserInformation, null=True, on_delete=models.SET_NULL, related_name='%(class)s_contactee')
+    user = models.ForeignKey(UserInformation, null=True, on_delete=models.SET_NULL, related_name='%(class)s_contacted')
+
+
+

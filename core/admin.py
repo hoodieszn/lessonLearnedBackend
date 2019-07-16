@@ -5,13 +5,13 @@ from core.models import (
     Course,
     Degree,
     School,
-    TutoredCourse,
+    PostingCourse,
     TutorReview,
-    TutorInformation,
+    TutorPosting,
     UserInformation
 )
 
-models = [Course, School, Degree, TutoredCourse, TutorReview, TutorInformation, UserInformation]
+models = [Course, School, Degree, PostingCourse, TutorReview, TutorPosting, UserInformation]
 
 class CourseAdmin(admin.ModelAdmin):
     list_display = ['pk', 'name', 'degree_name', 'school_name']
@@ -28,21 +28,18 @@ class DegreeAdmin(admin.ModelAdmin):
 class SchoolAdmin(admin.ModelAdmin):
     list_display = ['pk', 'name']
 
-class TutoredCourseAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'course', 'tutor']
-
-class TutorInformationAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'phone_number', 'lat', 'lon']
+class PostingCourseAdmin(admin.ModelAdmin):
+    list_display = ['pk', 'course', 'tutor_posting']
 
     # def degree_name(self, obj):
     #     return obj.degree.name
 
 class TutorReviewAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'comment', 'rating', 'user']
+    list_display = ['pk', 'review_text', 'rating', 'user']
 
 
 class UserInformationAdmin(admin.ModelAdmin):
-    list_display = ['pk', 'school', 'firebase_id']
+    list_display = ['pk', 'school', 'name', 'firebase_id']
 
 
 for model in models:
