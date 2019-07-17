@@ -10,11 +10,9 @@ def degree_to_dict(degree):
 def tutor_posting_to_dict(tutor_posting):
     return {'id': tutor_posting.id,
             'tutorName': tutor_posting.tutor.name,
-            'phoneNumber': tutor_posting.tutor.phone_number,
             'lat': tutor_posting.tutor.lat,
             'lon': tutor_posting.tutor.lon,
             'tutorId': tutor_posting.tutor.id,
-            'degree': tutor_posting.degree.name,
             'price': tutor_posting.price,
             'postText': tutor_posting.post_text}
 
@@ -28,6 +26,7 @@ def course_to_dict(course):
 
 def tutor_review_to_dict(tutor_review):
     return {'tutorName': tutor_review.tutor.name,
+            'studentName': tutor_review.user.name,
             'reviewText': tutor_review.review_text,
             'rating': tutor_review.rating,
             'userId': tutor_review.user.id, 

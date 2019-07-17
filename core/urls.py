@@ -8,5 +8,6 @@ urlpatterns = [
     url(r'^contacts$', views.handle_tutor_contacts, name='get_create_tutor_contacts'),
     url(r'^schools$', views.get_schools, name='get_schools'),
     url(r'^(?P<tutor_id>[0-9]+)/reviews$', views.tutor_review_handler, name='get_post_tutor_reviews'),
-    url(r'^users$', views.users_handler, name='get_create_users')
+    url(r'^users$', views.users_handler, name='get_create_users'),
+    url(r'^users/(?P<user_id>[0-9]+)$', views.get_user_by_id, name='get_user_by_id'),
 ]

@@ -42,12 +42,10 @@ def get_postings(request, degree):
             del result[i]
             continue
 
-        avg_rating, tutor_reviews = storage.get_tutor_ratings_reviews(posting.tutor)
+        # avg_rating, tutor_reviews = storage.get_tutor_ratings_reviews(posting.tutor)
 
         result[i].update({
             'courses': [serializers.course_to_dict(course.course) for course in tutored_courses],
-            'rating': avg_rating,
-            'reviews': [serializers.tutor_review_to_dict(review) for review in tutor_reviews],
         })
     
     return helpers.api_success({'tutorPostings': result})
@@ -204,7 +202,8 @@ def get_user(request):
         result['user'].update({'avgRating': avg_rating})
 
     else:
-        result['user'].update({'contactedTutors': None})
+        contacts = storage.get_contacted_tutors_for_user(user)
+        result['user'].update({'contactedTutors': [serializers.tutor_contact_to_dict(contact) for contact in contacts]})
 
 
     return helpers.api_success(result)
@@ -289,8 +288,32 @@ def create_tutor_contact(request, parsed_body=None):
     if existing_contact: 
         return helpers.api_error('Already exists a TutorContact for User: {} and Tutor: {}.'.format(user_id, tutor_id), status.HTTP_400_BAD_REQUEST)
 
-
     contact = storage.create_tutor_contact(user, tutor)
 
     return helpers.api_success({'contact': serializers.tutor_contact_to_dict(contact)})
+
+
+@api_view(['GET'])
+@renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+def get_user_by_id(request, user_id):
+
+    user = storage.get_user_by_id(user_id)
+
+    if not user:
+        return helpers.api_error('User: {} does not exist.'.format(user_id), status.HTTP_400_BAD_REQUEST)
+
+    result = {'user': serializers.user_to_dict(user)}
+
+    if user.user_type == models.UserType.Tutor.value:
+        tutor_postings = storage.get_tutor_postings(user)
+        avg_rating, tutor_reviews = storage.get_tutor_ratings_reviews(user)
+
+        result['user'].update({'postings': [serializers.tutor_posting_to_dict(posting) for posting in tutor_postings]})
+        result['user'].update({'reviews': [serializers.tutor_review_to_dict(review) for review in tutor_reviews]})
+
+    else:
+        contacts = storage.get_contacted_tutors_for_user(user)
+        result['user'].update({'contactedTutors': [serializers.tutor_contact_to_dict(contact) for contact in contacts]})
+
+    return helpers.api_success(result)
 
