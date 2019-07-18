@@ -191,31 +191,7 @@ def get_user(request):
     if not user:
         return helpers.api_error('Could not find a user with firebase_id: {}'.format(firebase_id), status.HTTP_400_BAD_REQUEST)
 
-    result = {'user': serializers.user_to_dict(user)}
-
-    if user.user_type == models.UserType.Tutor.value:
-        tutor_postings = storage.get_tutor_postings(user)
-        avg_rating, tutor_reviews = storage.get_tutor_ratings_reviews(user)
-
-        result['user'].update({'postings': [serializers.tutor_posting_to_dict(posting) for posting in tutor_postings]})
-        result['user'].update({'reviews': [serializers.tutor_review_to_dict(review) for review in tutor_reviews]})
-        result['user'].update({'avgRating': avg_rating})
-
-    else:
-        contacts = storage.get_contacted_tutors_for_user(user)
-
-        contacted_tuts = []
-        for contact in contacts:
-            contact_reported = storage.check_if_reported(contact.user, contact.tutor)
-
-            serialize_contact = serializers.tutor_contact_to_dict(contact)
-            serialize_contact.update({'reported': contact_reported})
-            
-            contacted_tuts.append(serialize_contact)
-
-        
-        result['user'].update({'contactedTutors': contacted_tuts})
-
+    result = get_user_data(user)
 
     return helpers.api_success(result)
 
@@ -322,29 +298,7 @@ def get_user_by_id(request, user_id):
     if not user:
         return helpers.api_error('User: {} does not exist.'.format(user_id), status.HTTP_400_BAD_REQUEST)
 
-    result = {'user': serializers.user_to_dict(user)}
-
-    if user.user_type == models.UserType.Tutor.value:
-        tutor_postings = storage.get_tutor_postings(user)
-        avg_rating, tutor_reviews = storage.get_tutor_ratings_reviews(user)
-
-        result['user'].update({'postings': [serializers.tutor_posting_to_dict(posting) for posting in tutor_postings]})
-        result['user'].update({'reviews': [serializers.tutor_review_to_dict(review) for review in tutor_reviews]})
-
-    else:
-
-        contacts = storage.get_contacted_tutors_for_user(user)
-        contacted_tuts = []
-
-        for contact in contacts:
-            contact_reported = storage.check_if_reported(contact.user, contact.tutor)
-
-            serialize_contact = serializers.tutor_contact_to_dict(contact)
-            serialize_contact.update({'reported': contact_reported})
-
-            contacted_tuts.append(serialize_contact)
-
-        result['user'].update({'contactedTutors': contacted_tuts})
+    result = get_user_data(user)
 
     return helpers.api_success(result)
 
@@ -381,3 +335,45 @@ def create_abuse_report(request, parsed_body=None):
         return helpers.api_error("Error creating AbuseReport. Ex: {}".
             format(str(ex)), status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+def get_user_data(user):
+
+    result = {'user': serializers.user_to_dict(user)}
+
+    if user.user_type == models.UserType.Tutor.value:
+        tutor_postings = storage.get_tutor_postings(user)
+        avg_rating, tutor_reviews = storage.get_tutor_ratings_reviews(user)
+
+        serialized_tutor_postings = []
+
+        for posting in tutor_postings:
+            serialized_posting = serializers.tutor_posting_to_dict(posting) 
+            tutored_courses = storage.get_courses_per_posting(posting)
+
+            serialized_posting.update({
+                'courses': [serializers.course_to_dict(course.course) for course in tutored_courses],
+            })
+
+            serialized_tutor_postings.append(serialized_posting)
+
+        result['user'].update({'postings': serialized_tutor_postings})
+        result['user'].update({'reviews': [serializers.tutor_review_to_dict(review) for review in tutor_reviews]})
+        result['user'].update({'avgRating': avg_rating})
+
+    else:
+        contacts = storage.get_contacted_tutors_for_user(user)
+
+        contacted_tuts = []
+        for contact in contacts:
+            contact_reported = storage.check_if_reported(contact.user, contact.tutor)
+
+            serialize_contact = serializers.tutor_contact_to_dict(contact)
+            serialize_contact.update({'reported': contact_reported})
+            
+            contacted_tuts.append(serialize_contact)
+
+        
+        result['user'].update({'contactedTutors': contacted_tuts})
+
+    return result
