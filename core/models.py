@@ -54,5 +54,8 @@ class TutorContacts(models.Model):
     tutor = models.ForeignKey(UserInformation, null=True, on_delete=models.SET_NULL, related_name='%(class)s_contactee')
     user = models.ForeignKey(UserInformation, null=True, on_delete=models.SET_NULL, related_name='%(class)s_contacted')
 
-
-
+class AbuseReport(models.Model):
+    tutor = models.ForeignKey(UserInformation, null=True, on_delete=models.SET_NULL, related_name='%(class)s_reported')
+    user = models.ForeignKey(UserInformation, null=True, on_delete=models.SET_NULL, related_name='%(class)s_reportee')
+    report_reason = models.CharField(max_length=400, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)

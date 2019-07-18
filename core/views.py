@@ -203,7 +203,18 @@ def get_user(request):
 
     else:
         contacts = storage.get_contacted_tutors_for_user(user)
-        result['user'].update({'contactedTutors': [serializers.tutor_contact_to_dict(contact) for contact in contacts]})
+
+        contacted_tuts = []
+        for contact in contacts:
+            contact_reported = storage.check_if_reported(contact.user, contact.tutor)
+
+            serialize_contact = serializers.tutor_contact_to_dict(contact)
+            serialize_contact.update({'reported': contact_reported})
+            
+            contacted_tuts.append(serialize_contact)
+
+        
+        result['user'].update({'contactedTutors': contacted_tuts})
 
 
     return helpers.api_success(result)
@@ -260,8 +271,17 @@ def get_tutor_contacts(request):
         return helpers.api_error('User with id: {} not found'.format(user_id), status.HTTP_400_BAD_REQUEST)
 
     contacts = storage.get_contacted_tutors_for_user(user)
+    contacted_tuts = []
 
-    return helpers.api_success({'contacts': [serializers.tutor_contact_to_dict(contact) for contact in contacts]})
+    for contact in contacts:
+        contact_reported = storage.check_if_reported(contact.user, contact.tutor)
+
+        serialize_contact = serializers.tutor_contact_to_dict(contact)
+        serialize_contact.update({'reported': contact_reported})
+
+        contacted_tuts.append(serialize_contact)
+    
+    return helpers.api_success({'contacts': contacted_tuts})
 
 
 @helpers.parse_api_json_body
@@ -312,8 +332,19 @@ def get_user_by_id(request, user_id):
         result['user'].update({'reviews': [serializers.tutor_review_to_dict(review) for review in tutor_reviews]})
 
     else:
+        
         contacts = storage.get_contacted_tutors_for_user(user)
-        result['user'].update({'contactedTutors': [serializers.tutor_contact_to_dict(contact) for contact in contacts]})
+        contacted_tuts = []
+
+        for contact in contacts:
+            contact_reported = storage.check_if_reported(contact.user, contact.tutor)
+
+            serialize_contact = serializers.tutor_contact_to_dict(contact)
+            serialize_contact.update({'reported': contact_reported})
+
+            contacted_tuts.append(serialize_contact)
+
+        result['user'].update({'contactedTutors': contacted_tuts})
 
     return helpers.api_success(result)
 

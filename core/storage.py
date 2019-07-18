@@ -119,3 +119,9 @@ def get_contacted_tutors_for_user(user):
 
 def create_tutor_contact(user, tutor):
     return models.TutorContacts.objects.create(user=user, tutor=tutor)
+
+def get_reported_users(user):
+    return models.AbuseReport.objects.filter(user=user)
+
+def check_if_reported(user, tutor):
+    return get_reported_users(user).filter(tutor=tutor).count() > 0
