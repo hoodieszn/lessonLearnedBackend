@@ -53,7 +53,12 @@ def user_to_dict(user):
             'name': user.name}
 
 def tutor_contact_to_dict(tutor_contact):
-
     return {'id': tutor_contact.id,
             'userId': tutor_contact.user.id,
             'tutorInfo': user_to_dict(tutor_contact.tutor)}
+
+def abuse_report_to_dict(abuse_report):
+    return {'id': abuse_report.id, 
+            'tutorId': abuse_report.tutor.id, 
+            'userId': abuse_report.user.id,
+            'reportReason': abuse_report.report_reason}

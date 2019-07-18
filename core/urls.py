@@ -10,4 +10,6 @@ urlpatterns = [
     url(r'^(?P<tutor_id>[0-9]+)/reviews$', views.tutor_review_handler, name='get_post_tutor_reviews'),
     url(r'^users$', views.users_handler, name='get_create_users'),
     url(r'^users/(?P<user_id>[0-9]+)$', views.get_user_by_id, name='get_user_by_id'),
+    url(r'^reportabuse$', views.create_abuse_report, name='create_abuse_report')
+
 ]

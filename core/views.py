@@ -332,7 +332,7 @@ def get_user_by_id(request, user_id):
         result['user'].update({'reviews': [serializers.tutor_review_to_dict(review) for review in tutor_reviews]})
 
     else:
-        
+
         contacts = storage.get_contacted_tutors_for_user(user)
         contacted_tuts = []
 
@@ -347,4 +347,37 @@ def get_user_by_id(request, user_id):
         result['user'].update({'contactedTutors': contacted_tuts})
 
     return helpers.api_success(result)
+
+
+@api_view(['POST'])
+@renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+@helpers.parse_api_json_body
+def create_abuse_report(request, parsed_body=None):
+    tutor_id = parsed_body.get('tutorId', None)
+    user_id = parsed_body.get('userId', None)
+    report_msg = parsed_body.get('reportReason', None)
+
+    if not (tutor_id and user_id and report_msg):
+            return helpers.api_error('Invalid fields. userId: {} tutorId: {} reportReason'.format(
+                user_id, tutor_id, report_msg), status.HTTP_400_BAD_REQUEST)
+
+
+    tutor = storage.get_user_by_id(tutor_id)
+
+    if not tutor:
+        return helpers.api_error('Tutor with id: {} not found'.format(tutor_id), status.HTTP_400_BAD_REQUEST)
+
+    user = storage.get_user_by_id(user_id)
+
+    if not user:
+        return helpers.api_error('User with id: {} not found'.format(user_id), status.HTTP_400_BAD_REQUEST)
+
+    try:
+        abuse_report = storage.create_abuse_report(user, tutor, report_msg)
+
+        return helpers.api_success({'abuseReport': serializers.abuse_report_to_dict(abuse_report)})
+
+    except Exception as ex:
+        return helpers.api_error("Error creating AbuseReport. Ex: {}".
+            format(str(ex)), status.HTTP_500_INTERNAL_SERVER_ERROR)
 

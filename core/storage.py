@@ -125,3 +125,9 @@ def get_reported_users(user):
 
 def check_if_reported(user, tutor):
     return get_reported_users(user).filter(tutor=tutor).count() > 0
+
+def create_abuse_report(user, tutor, report_msg):
+    return models.AbuseReport.objects.create(
+        user=user,
+        tutor=tutor,
+        report_reason=report_msg)
