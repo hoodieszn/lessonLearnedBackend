@@ -45,6 +45,7 @@ def user_to_dict(user):
 
     return {'id': user.id,
             'userType': user_type,
+            'schoolName': user.school.name,
             'schoolId': user.school.id,
             'firebaseId': user.firebase_id,
             'phoneNumber': user.phone_number,
