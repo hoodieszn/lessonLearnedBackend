@@ -45,10 +45,11 @@ def get_postings(request, degree):
             del result[i]
             continue
 
-        # avg_rating, tutor_reviews = storage.get_tutor_ratings_reviews(posting.tutor)
+        avg_rating, tutor_reviews = storage.get_tutor_ratings_reviews(posting.tutor)
 
         result[i].update({
             'courses': [serializers.course_to_dict(course.course) for course in tutored_courses],
+            'avgRating': avg_rating,
         })
     
     return helpers.api_success({'tutorPostings': result})
