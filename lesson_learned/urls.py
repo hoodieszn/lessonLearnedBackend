@@ -17,6 +17,8 @@ from django.contrib import admin
 from django.conf.urls import include, url
 from rest_framework_swagger.views import get_swagger_view
 from rest_framework_swagger import renderers
+from rest_framework.permissions import IsAuthenticated
+
 
 class JSONOpenAPIRenderer(renderers.OpenAPIRenderer):
     media_type = 'application/json'

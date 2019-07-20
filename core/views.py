@@ -4,14 +4,16 @@ from . import helpers
 from . import models
 from rest_framework import status
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_swagger import renderers
-from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.decorators import api_view, renderer_classes, permission_classes
 
 
 # need to implement token auth or something
 
 @api_view(['GET'])
 @renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+@permission_classes([IsAuthenticated])
 @require_GET
 def get_degrees(request, school_id):
     # Return All the degrees for a given school
@@ -21,6 +23,7 @@ def get_degrees(request, school_id):
 
 @api_view(['GET', 'POST'])
 @renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+@permission_classes([IsAuthenticated])
 def postings_handler(request, degree_id):
     if request.method == 'GET':
         return get_postings(request, degree_id)
@@ -52,6 +55,7 @@ def get_postings(request, degree):
 
 @helpers.parse_api_json_body
 @require_http_methods(["POST"])
+@permission_classes([IsAuthenticated])
 def create_tutor_posting(request, degree_id, parsed_body=None):
 
     degree = storage.get_degree_by_id(degree_id)
@@ -99,6 +103,7 @@ def create_tutor_posting(request, degree_id, parsed_body=None):
 
 @api_view(['GET'])
 @renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+@permission_classes([IsAuthenticated])
 def get_courses(request, degree_id):
 
     degree = storage.get_degree_by_id(degree_id)
@@ -111,6 +116,7 @@ def get_courses(request, degree_id):
 
 @api_view(['GET'])
 @renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+@permission_classes([IsAuthenticated])
 def get_schools(request):
 
     schools = storage.get_schools()
@@ -118,6 +124,7 @@ def get_schools(request):
 
 @api_view(['GET', 'POST'])
 @renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+@permission_classes([IsAuthenticated])
 def tutor_review_handler(request, tutor_id):
     if request.method == 'GET':
         return get_tutor_reviews(request, int(tutor_id))
@@ -174,6 +181,7 @@ def add_tutor_review(request, tutor_id, parsed_body=None):
 
 @api_view(['GET', 'POST'])
 @renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+@permission_classes([IsAuthenticated])
 def users_handler(request):
     if request.method == 'GET':
         return get_user(request)
@@ -228,6 +236,7 @@ def create_user(request, parsed_body=None):
 
 @api_view(['GET', 'POST'])
 @renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+@permission_classes([IsAuthenticated])
 def handle_tutor_contacts(request):
     if request.method == 'GET':
         return get_tutor_contacts(request)
@@ -291,6 +300,7 @@ def create_tutor_contact(request, parsed_body=None):
 
 @api_view(['GET'])
 @renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+@permission_classes([IsAuthenticated])
 def get_user_by_id(request, user_id):
 
     user = storage.get_user_by_id(user_id)
@@ -305,6 +315,7 @@ def get_user_by_id(request, user_id):
 
 @api_view(['POST'])
 @renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+@permission_classes([IsAuthenticated])
 @helpers.parse_api_json_body
 def create_abuse_report(request, parsed_body=None):
     tutor_id = parsed_body.get('tutorId', None)
@@ -338,7 +349,6 @@ def create_abuse_report(request, parsed_body=None):
 
 
 def get_user_data(user):
-
     result = {'user': serializers.user_to_dict(user)}
 
     if user.user_type == models.UserType.Tutor.value:
