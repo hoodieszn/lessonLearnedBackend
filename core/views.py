@@ -298,11 +298,19 @@ def create_tutor_contact(request, parsed_body=None):
     return helpers.api_success({'contact': serializers.tutor_contact_to_dict(contact)})
 
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT'])
 @renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
 @permission_classes([IsAuthenticated])
-def get_user_by_id(request, user_id):
+@helpers.parse_api_json_body
+def handle_user_by_id(request, user_id, parsed_body=None):
+    if request.method == 'GET':
+        return get_user_by_id(request, user_id)
+    elif request.method == 'PUT':
+        return update_user(request, user_id, parsed_body)
 
+
+
+def get_user_by_id(request, user_id):
     user = storage.get_user_by_id(user_id)
 
     if not user:
@@ -312,6 +320,23 @@ def get_user_by_id(request, user_id):
 
     return helpers.api_success(result)
 
+
+def update_user(request, user_id, parsed_body):
+    lat = parsed_body.get('lat', None)
+    lon = parsed_body.get('lon', None)
+
+    if not (lat and lon):
+        return helpers.api_error('Invalid Fields. lat: {}, lon: {}'.format(lat, lon))
+
+    user = storage.get_user_by_id(user_id)
+
+    if not user:
+        return helpers.api_error('Could not find user with id: {}'.format(user_id))
+
+    updated_user = storage.update_user(user, lat, lon)
+
+    return helpers.api_success({'user': serializers.user_to_dict(updated_user)})
+    
 
 @api_view(['POST'])
 @renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
@@ -382,8 +407,20 @@ def get_user_data(user):
             serialize_contact.update({'reported': contact_reported})
             
             contacted_tuts.append(serialize_contact)
-
         
         result['user'].update({'contactedTutors': contacted_tuts})
 
     return result
+
+@api_view(['DELETE'])
+@renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+@permission_classes([IsAuthenticated])
+def delete_posting(request, posting_id):
+    posting = storage.get_posting_by_id(posting_id)
+
+    if not posting:
+        return helpers.api_error('Posting with id: {} not found'.format(posting_id), status.HTTP_400_BAD_REQUEST)
+
+    posting.delete()
+
+    return helpers.api_success('Posting with id: {} deleted'.format(posting_id))

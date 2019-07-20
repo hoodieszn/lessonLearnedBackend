@@ -34,7 +34,6 @@ def get_tutor_ratings_reviews(tutor):
 def get_degree_by_id(id):
     return safe_get(models.Degree, id=id)
 
-
 def create_tutor_posting(tutor, degree, price, post_text, courses):
     try:
         with transaction.atomic():
@@ -131,3 +130,14 @@ def create_abuse_report(user, tutor, report_msg):
         user=user,
         tutor=tutor,
         report_reason=report_msg)
+
+
+def update_user(user, lat, lon):
+    user.lat = lat
+    user.lon = lon
+    user.save()
+
+    return user
+
+def get_posting_by_id(posting_id):
+    return safe_get(models.TutorPosting, id=posting_id)
