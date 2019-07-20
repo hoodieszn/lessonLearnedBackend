@@ -4,12 +4,22 @@ from . import helpers
 from . import models
 from rest_framework import status
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework_swagger import renderers
 from rest_framework.decorators import api_view, renderer_classes, permission_classes
+from rest_framework import response, schemas
 
 
 # need to implement token auth or something
+
+
+@api_view()
+@renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])
+@permission_classes([AllowAny])
+def schema_view(request):
+    generator = schemas.SchemaGenerator(title='API')
+    return response.Response(generator.get_schema(request=request))
+
 
 @api_view(['GET'])
 @renderer_classes([renderers.OpenAPIRenderer, renderers.SwaggerUIRenderer])

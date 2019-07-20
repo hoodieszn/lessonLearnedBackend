@@ -17,16 +17,23 @@ from django.contrib import admin
 from django.conf.urls import include, url
 from rest_framework_swagger.views import get_swagger_view
 from rest_framework_swagger import renderers
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser,AllowAny
 
+from rest_framework.decorators import api_view, renderer_classes, permission_classes
+from core import views
 
 class JSONOpenAPIRenderer(renderers.OpenAPIRenderer):
     media_type = 'application/json'
 
-schema_view = get_swagger_view(title='Main API')
+# schema_view = get_swagger_view(title='Main API')
+
+from rest_framework_swagger.renderers import OpenAPIRenderer, SwaggerUIRenderer
+from rest_framework.decorators import api_view, renderer_classes
+from rest_framework import response, schemas
+
 
 urlpatterns = [
-    url(r'^$', schema_view),
+    url(r'^$', views.schema_view),
     url(r'^api/v1/', include('core.urls'), name='core'),
     url(r'^admin/', admin.site.urls)
 ]
