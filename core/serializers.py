@@ -8,7 +8,6 @@ def degree_to_dict(degree):
             'schoolName': degree.school.name}
 
 def tutor_posting_to_dict(tutor_posting):
-    
     return {'id': tutor_posting.id,
             'tutorName': tutor_posting.tutor.name,
             'lat': tutor_posting.tutor.lat,
@@ -23,7 +22,8 @@ def posting_course_to_dict(posting_course):
 
 def course_to_dict(course):
     return {'id': course.id,
-            'name': course.name}
+            'name': course.name,
+            'schoolId': course.degree.school.id}
 
 def tutor_review_to_dict(tutor_review):
     return {'tutorName': tutor_review.tutor.name,
