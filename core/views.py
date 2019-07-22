@@ -242,6 +242,8 @@ def create_user(request, parsed_body=None):
 
         if user_type == 'tutor':
             result['user'].update({'avgRating': 0})
+            result['user'].update({'reviews': []})
+            result['user'].update({'postings': []})
 
         return helpers.api_success(result)
 
