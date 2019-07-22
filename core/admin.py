@@ -8,10 +8,21 @@ from core.models import (
     PostingCourse,
     TutorReview,
     TutorPosting,
-    UserInformation
+    UserInformation,
+    AbuseReport,
+
 )
 
-models = [Course, School, Degree, PostingCourse, TutorReview, TutorPosting, UserInformation]
+models = [Course, School, Degree, PostingCourse, TutorReview, TutorPosting, UserInformation, AbuseReport]
+
+class AbuseReportAdmin(admin.ModelAdmin):
+    list_display = ['pk', 'tutor_name', 'user_name', 'report_reason']
+
+    def tutor_name(self, obj):
+        return obj.tutor.name
+
+    def user_name(self, obj):
+        return obj.user.name
 
 class CourseAdmin(admin.ModelAdmin):
     list_display = ['pk', 'name', 'degree_name', 'school_name']
