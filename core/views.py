@@ -238,7 +238,12 @@ def create_user(request, parsed_body=None):
         user_type = models.UserType(user_type).value
         user_info = storage.create_user_info(school, name, phone_number, user_type, firebase_id, lat, lon)
 
-        return helpers.api_success({'user': serializers.user_to_dict(user_info)})
+        result = {'user': serializers.user_to_dict(user_info)}
+
+        if user_type == 'tutor':
+            result['user'].update({'avgRating': 0})
+
+        return helpers.api_success(result)
 
     except Exception as ex:
         return helpers.api_error("Error occured while creating a User. Exception: {}".
