@@ -122,7 +122,13 @@ def get_courses(request, degree_id):
     if not degree:
         return helpers.api_error("Degree {} not found".format(degree_id), status.HTTP_400_BAD_REQUEST)
 
+    course_subject = request.GET.get('subject')
+
     courses_for_degree = storage.get_courses_by_degree(degree)
+
+    if course_subject:
+        courses_for_degree = courses_for_degree.filter(name__contains=course_subject)
+
     return helpers.api_success({'courses': [serializers.course_to_dict(course) for course in courses_for_degree]})
 
 @api_view(['GET'])
